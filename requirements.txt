@@ -2,3 +2,4 @@ requests
 notion-client
 pyyaml
 setuptools
+beautifulsoup4

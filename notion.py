@@ -1,6 +1,7 @@
 from notion_client import Client
 
-from tmdb import get_details, get_duration, get_streaming_platforms
+from scraper import get_imdb_rating
+from tmdb import get_details, get_duration, get_external_ids, get_streaming_platforms
 
 
 def get_parent_page_id(notion: Client, title: str) -> str:
@@ -63,7 +64,7 @@ def get_or_create_movies_database(
             }
         },
         "Rating": {"number": {}},
-        "TMDB Rating": {"number": {}},
+        "IMDB Rating": {"number": {}},
         "Streaming Platforms": {
             "multi_select": {
                 "options": [
@@ -134,7 +135,7 @@ def get_or_create_tv_database(notion: Client, parent_page_id: str, title: str) -
         },
         "Progress": {"rich_text": {}},
         "Rating": {"number": {}},
-        "TMDB Rating": {"number": {}},
+        "IMDB Rating": {"number": {}},
         "Streaming Platforms": {
             "multi_select": {
                 "options": [
@@ -174,7 +175,7 @@ def create_movie_page(notion: Client, database_id: str, item: dict, api_key: str
     release_year = int(details.get("release_date").split("-")[0])
     duration = get_duration(details.get("runtime"))
     movie_status = details.get("status", "Unknown")
-    vote_average = details.get("vote_average").__round__(1)
+    imdb_rating = get_imdb_rating(details.get("imdb_id"))
 
     streaming_platforms = [
         {"name": provider["provider_name"]} for provider in watch_providers
@@ -187,7 +188,7 @@ def create_movie_page(notion: Client, database_id: str, item: dict, api_key: str
         "Duration": {"rich_text": [{"text": {"content": duration}}]},
         "Movie Status": {"select": {"name": movie_status}},
         "Rating": {"number": None},
-        "TMDB Rating": {"number": vote_average},
+        "IMDB Rating": {"number": imdb_rating},
         "Streaming Platforms": {"multi_select": streaming_platforms},
     }
     notion.pages.create(parent={"database_id": database_id}, properties=props)
@@ -196,13 +197,14 @@ def create_movie_page(notion: Client, database_id: str, item: dict, api_key: str
 def create_tv_page(notion: Client, database_id: str, item: dict, api_key: str):
     details = get_details(item["id"], "tv", api_key)
     watch_providers = get_streaming_platforms(item["id"], "tv", api_key)
+    external_ids = get_external_ids(item["id"], "tv", api_key)
 
     title = details.get("name")
     genres = [genre["name"] for genre in details.get("genres", [])]
     release_year = int(details.get("first_air_date").split("-")[0])
     seasons = details.get("number_of_seasons", 0)
     show_status = details.get("status", "Unknown")
-    vote_average = details.get("vote_average").__round__(1)
+    imdb_rating = get_imdb_rating(external_ids.get("imdb_id"))
 
     streaming_platforms = [
         {"name": provider["provider_name"]} for provider in watch_providers
@@ -216,7 +218,7 @@ def create_tv_page(notion: Client, database_id: str, item: dict, api_key: str):
         "Progress": {"rich_text": [{"text": {"content": ""}}]},
         "Show Status": {"select": {"name": show_status}},
         "Rating": {"number": None},
-        "TMDB Rating": {"number": vote_average},
+        "IMDB Rating": {"number": imdb_rating},
         "Streaming Platforms": {"multi_select": streaming_platforms},
     }
     notion.pages.create(parent={"database_id": database_id}, properties=props)

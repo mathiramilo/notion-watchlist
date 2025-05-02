@@ -31,6 +31,14 @@ def get_streaming_platforms(item_id: int, media_type: str, api_key: str) -> list
     return res.json().get("results", {}).get("UY", {}).get("flatrate", [])
 
 
+def get_external_ids(item_id: int, media_type: str, api_key: str) -> dict:
+    url = f"https://api.themoviedb.org/3/{media_type}/{item_id}/external_ids"
+    headers = {"Authorization": f"Bearer {api_key}"}
+    res = requests.get(url, headers=headers)
+    res.raise_for_status()
+    return res.json()
+
+
 def get_duration(runtime: int) -> str:
     if runtime is None:
         return "N/A"
