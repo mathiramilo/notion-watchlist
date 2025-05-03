@@ -122,7 +122,11 @@ def main():
     movies_db = config["NOTION_MOVIES_DB_ID"]
     tv_db = config["NOTION_TV_DB_ID"]
 
-    item = fetch_tmdb_item(args.name, args.type, tmdb_key)
+    try:
+        item = fetch_tmdb_item(args.name, args.type, tmdb_key)
+    except ValueError as e:
+        print(f"Error fetching TMDB item: {e}")
+        return
 
     if page_exists(notion, movies_db, item.get("title") or item.get("name")):
         print(f"Page for {item.get('title') or item.get('name')} already exists.")
@@ -130,10 +134,10 @@ def main():
 
     if args.type == "movie":
         create_movie_page(notion, movies_db, item, tmdb_key)
-        print(f"Created page for movie: {item.get('title')} in Notion.")
+        print(f"Movie \"{item.get('title')}\" added to watchlist in Notion.")
     else:
         create_tv_page(notion, tv_db, item, tmdb_key)
-        print(f"Created page for TV show: {item.get('name')} in Notion.")
+        print(f"TV show \"{item.get('name')}\" added to watchlist in Notion.")
 
 
 if __name__ == "__main__":
