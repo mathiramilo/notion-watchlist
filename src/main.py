@@ -1,5 +1,6 @@
 import argparse
 import os
+from importlib.metadata import version
 
 import yaml
 from notion_client import Client
@@ -45,9 +46,15 @@ def main():
     parser = argparse.ArgumentParser(
         description="Fetch TMDB and IMDB data to create a Notion page for a movie or TV show"
     )
+    parser.add_argument(
+        "-v", "--version",
+        action="version",
+        version=version("notion-watchlist"),
+        help="Show the version of the script",
+    )
     parser.add_argument("name", help="Name of the movie or TV show")
     parser.add_argument(
-        "--type",
+        "-t", "--type",
         choices=["movie", "tv"],
         default="movie",
         help="Specify 'movie' or 'tv' to differentiate the API endpoint",
@@ -65,7 +72,7 @@ def main():
         help="Name of the Notion page where the databases will be created (overrides the one in config)",
     )
     parser.add_argument(
-        "--recreate",
+        "-r", "--recreate",
         action="store_true",
         help="Force re-creation of the Notion databases",
     )
