@@ -93,3 +93,7 @@ This is a python script that allows you to create a watchlist in Notion. It uses
 ### Turn into Inline Database
 
 Press right-click on the database and select **_"Turn into inline database"_**. This will allow you to add the database to any page in Notion.
+
+![Screenshot 2025-05-03 at 12 30 50 AM](https://github.com/user-attachments/assets/871ba29a-81bf-47ab-959e-82033ee23992)
+![Screenshot 2025-05-03 at 12 31 22 AM](https://github.com/user-attachments/assets/656882f5-86dc-4c1b-878b-ca9035b08508)
+
