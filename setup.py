@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="notion-watchlist",
-    version="0.1.1",
+    version="0.2.0",
     description="CLI tool for automating your movie & TV watchlist in Notion via TMDB and IMDb",
     author="Mathias Ramilo",
     author_email="mathiramilo2290@gmail.com",
