@@ -1,3 +1,15 @@
+# Build artifacts
+build/
+dist/
+
+# Egg‐info directories anywhere
+*.egg-info/
+**/*.egg-info/
+
+# Wheels and source tarballs
+*.whl
+*.tar.gz
+
 __pycache__
 venv
 config.yaml

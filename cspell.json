@@ -9,6 +9,7 @@
     "pycache",
     "watchlist",
     "beautifulsoup",
-    "imdb"
+    "imdb",
+    "ramilo"
   ]
 }
