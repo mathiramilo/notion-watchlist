@@ -58,7 +58,8 @@ def get_or_create_movies_database(
             "select": {
                 "options": [
                     {"name": "Released", "color": "green"},
-                    {"name": "Upcoming", "color": "blue"},
+                    {"name": "Post Production", "color": "purple"},
+                    {"name": "In Production", "color": "blue"},
                     {"name": "Canceled", "color": "red"},
                 ]
             }
@@ -122,7 +123,7 @@ def get_or_create_tv_database(notion: Client, page_id: str, title: str) -> str:
                 ]
             }
         },
-        "Release Year": {"number": {}},
+        "Airing Period": {"rich_text": {}},
         "Seasons": {"number": {}},
         "Show Status": {
             "select": {
@@ -202,9 +203,12 @@ def create_tv_page(notion: Client, database_id: str, item: dict, api_key: str):
     title = details.get("name")
     genres = [genre["name"] for genre in details.get("genres", [])]
     release_year = int(details.get("first_air_date").split("-")[0])
+    last_air_year = int(details.get("last_air_date").split("-")[0])
     seasons = details.get("number_of_seasons", 0)
     show_status = details.get("status", "Unknown")
     imdb_rating = get_imdb_rating(external_ids.get("imdb_id"))
+
+    airing_period = f"{release_year}—{last_air_year}" if show_status in ["Ended", "Canceled"] else f"{release_year}—"
 
     streaming_platforms = [
         {"name": provider["provider_name"]} for provider in watch_providers
@@ -213,7 +217,7 @@ def create_tv_page(notion: Client, database_id: str, item: dict, api_key: str):
         "Name": {"title": [{"text": {"content": title}}]},
         "Genres": {"multi_select": [{"name": genre} for genre in genres]},
         "Status": {"select": {"name": "Want to Watch"}},
-        "Release Year": {"number": release_year},
+        "Airing Period": {"rich_text": [{"text": {"content": airing_period}}]},
         "Seasons": {"number": seasons},
         "Progress": {"rich_text": [{"text": {"content": ""}}]},
         "Show Status": {"select": {"name": show_status}},
