@@ -9,7 +9,7 @@ from notion import (
     create_tv_page,
     get_or_create_movies_database,
     get_or_create_tv_database,
-    get_parent_page_id,
+    get_page_id,
     page_exists,
 )
 from tmdb import fetch_tmdb_item
@@ -42,20 +42,8 @@ def prompt_once(config, key, prompt):
 
 
 def main():
-    config = load_config()
-
-    tmdb_key = prompt_once(config, "TMDB_API_KEY", "Enter your TMDB API key: ")
-    notion_token = prompt_once(
-        config, "NOTION_TOKEN", "Enter your Notion integration token: "
-    )
-    parent_page_name = prompt_once(
-        config, "NOTION_PARENT_PAGE_NAME", "Enter the name of the Notion parent page: "
-    )
-
-    notion = Client(auth=notion_token)
-
     parser = argparse.ArgumentParser(
-        description="Fetch TMDB data and create a Notion page for a movie or TV show"
+        description="Fetch TMDB and IMDB data to create a Notion page for a movie or TV show"
     )
     parser.add_argument("name", help="Name of the movie or TV show")
     parser.add_argument(
@@ -66,18 +54,15 @@ def main():
     )
     parser.add_argument(
         "--tmdb-key",
-        default=tmdb_key,
         help="TMDB API key (overrides the one in config)",
     )
     parser.add_argument(
         "--notion-token",
-        default=notion_token,
         help="Notion integration token (overrides the one in config)",
     )
     parser.add_argument(
-        "--parent-page-name",
-        default=parent_page_name,
-        help="Name of the Notion parent page (overrides the one in config)",
+        "--page-name",
+        help="Name of the Notion page where the databases will be created (overrides the one in config)",
     )
     parser.add_argument(
         "--recreate",
@@ -86,32 +71,44 @@ def main():
     )
     args = parser.parse_args()
 
+    config = load_config()
+    
     if args.tmdb_key:
         config["TMDB_API_KEY"] = args.tmdb_key
         save_config(config)
     if args.notion_token:
         config["NOTION_TOKEN"] = args.notion_token
         save_config(config)
-    if args.parent_page_name:
-        config["NOTION_PARENT_PAGE_NAME"] = args.parent_page_name
+    if args.page_name:
+        config["PAGE_NAME"] = args.page_name
         save_config(config)
     if args.recreate:
         config.pop("NOTION_MOVIES_DB_ID", None)
         config.pop("NOTION_TV_DB_ID", None)
         save_config(config)
+    
+    tmdb_key = prompt_once(config, "TMDB_API_KEY", "Enter your TMDB API key: ")
+    notion_token = prompt_once(
+        config, "NOTION_TOKEN", "Enter your Notion integration token: "
+    )
+    page_name = prompt_once(
+        config, "PAGE_NAME", "Enter the name of the Notion page: "
+    )
 
-    parent_page_id = get_parent_page_id(notion, parent_page_name)
-    config["NOTION_PARENT_PAGE_ID"] = parent_page_id
+    notion = Client(auth=notion_token)
+
+    page_id = get_page_id(notion, page_name)
+    config["NOTION_PAGE_ID"] = page_id
     save_config(config)
 
     if "NOTION_MOVIES_DB_ID" not in config or not config["NOTION_MOVIES_DB_ID"]:
         config["NOTION_MOVIES_DB_ID"] = get_or_create_movies_database(
-            notion, parent_page_id, "Movies"
+            notion, page_id, "Movies"
         )
         save_config(config)
     if "NOTION_TV_DB_ID" not in config or not config["NOTION_TV_DB_ID"]:
         config["NOTION_TV_DB_ID"] = get_or_create_tv_database(
-            notion, parent_page_id, "TV Shows"
+            notion, page_id, "TV Shows"
         )
         save_config(config)
 

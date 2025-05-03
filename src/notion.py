@@ -4,7 +4,7 @@ from scraper import get_imdb_rating
 from tmdb import get_details, get_duration, get_external_ids, get_streaming_platforms
 
 
-def get_parent_page_id(notion: Client, title: str) -> str:
+def get_page_id(notion: Client, title: str) -> str:
     res = notion.search(query=title, filter={"property": "object", "value": "page"})
     for r in res.get("results", []):
         props = r.get("properties", {}).get("title", {}).get("title", [])
@@ -16,7 +16,7 @@ def get_parent_page_id(notion: Client, title: str) -> str:
 
 
 def get_or_create_movies_database(
-    notion: Client, parent_page_id: str, title: str
+    notion: Client, page_id: str, title: str
 ) -> str:
     res = notion.search(
         **{"query": title, "filter": {"property": "object", "value": "database"}}
@@ -79,7 +79,7 @@ def get_or_create_movies_database(
     }
 
     db = notion.databases.create(
-        parent={"page_id": parent_page_id},
+        parent={"page_id": page_id},
         title=[{"type": "text", "text": {"content": title}}],
         properties=props,
     )
@@ -87,7 +87,7 @@ def get_or_create_movies_database(
     return db["id"]
 
 
-def get_or_create_tv_database(notion: Client, parent_page_id: str, title: str) -> str:
+def get_or_create_tv_database(notion: Client, page_id: str, title: str) -> str:
     res = notion.search(
         **{"query": title, "filter": {"property": "object", "value": "database"}}
     )
@@ -150,7 +150,7 @@ def get_or_create_tv_database(notion: Client, parent_page_id: str, title: str) -
     }
 
     db = notion.databases.create(
-        parent={"page_id": parent_page_id},
+        parent={"page_id": page_id},
         title=[{"type": "text", "text": {"content": title}}],
         properties=props,
     )
